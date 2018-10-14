@@ -1,2 +1,6 @@
-# Executables
+# Executables and outputs
 *.out
+*.txt
+
+# Test files
+test.cpp
