@@ -9,8 +9,9 @@ const int WordLength = 40;
 ll Fibos[WordLength];
 ll SuperFibos[WordLength];
 string Sequence[MaxCols];
-bitset<MaxCols> HankelRow;
-vector<bitset <MaxCols> > UniqueRows;
+bitset < MaxCols > HankelRow;
+vector < pair < int, bitset < MaxCols > > > UniqueRows;
+map < int, vector < int > > EquivalenceClasses;
 
 struct AdderInfo
 {
@@ -147,9 +148,10 @@ int main(int argc, char* argv[])
         bool seen = 0;
         for (auto it = UniqueRows.begin(); it != UniqueRows.end(); it++)
         {
-            bitset<MaxCols> xorWithRow = ((*it) ^ HankelRow);
+            bitset<MaxCols> xorWithRow = ((it->second) ^ HankelRow);
             if (xorWithRow.none())
             {
+                EquivalenceClasses[it->first].push_back(row);
                 seen = 1;
                 break;
             }
@@ -158,14 +160,21 @@ int main(int argc, char* argv[])
         if (!seen)
         {
             hankel << row << ": " << HankelRow << "\n";
-            UniqueRows.push_back(HankelRow);
+            UniqueRows.push_back(make_pair(row, HankelRow));
+            EquivalenceClasses[row] = {row};
         }
     }
 
-    hankel.close();
     cout << "\r" << "100.00% complete \n";
     cout << "Total unique rows found: " << UniqueRows.size() << "\n";
-    // fprintf(hankel, "Total unique rows: %d", UniqueRows.size());
+    hankel << "\n------------------------------\nEquivalence Classes:\n";
 
+    for (auto it = EquivalenceClasses.begin(); it != EquivalenceClasses.end(); it++)
+    {
+        hankel << it->first << ": ";
+        PrintVector(it->second, hankel);
+    }
+
+    hankel.close();
     return 0;
 }

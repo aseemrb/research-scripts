@@ -72,3 +72,10 @@ string GetTriplet(int n, int base)
 
     return s;
 }
+
+// Print a vector with spaces between elements. Newline after the last element.
+void PrintVector(vector<int> &v, fstream& fs)
+{
+    for (auto it = v.begin(); it != v.end(); it++) fs << (*it) << " ";
+    fs << "\n";
+}
