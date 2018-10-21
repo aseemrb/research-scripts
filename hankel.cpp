@@ -2,8 +2,8 @@
 using namespace std;
 
 // Constants.
-const int MaxCols = 10000000;
-const int WordLength = 40;
+const int MaxCols = 1e5;
+const int WordLength = 30;
 
 // Global values.
 ll Fibos[WordLength];
@@ -75,7 +75,7 @@ void FillHankelRow(int row, AdderInfo adderInfo)
         s = leftWord + Sequence[col];
         int n = s.length();
 
-        // cout << "s is: " << s <<"\n";
+        // cout << "s is: " << s << "\n";
         string triplet;
         ProblemInstance xyz = {0, 0, 0};
 
@@ -94,7 +94,7 @@ void FillHankelRow(int row, AdderInfo adderInfo)
             if (((!prev0[0]) && ord(triplet[0]) == 2) ||
                 ((!prev0[1]) && ord(triplet[1]) == 2) ||
                 ((!prev0[2]) && ord(triplet[2]) == 2) ||
-                (i == 0 && (ord(triplet[0]) == 2 || ord(triplet[1]) == 2 || ord(triplet[2]) == 2)))
+                (i == n-1 && (ord(triplet[0]) == 2 || ord(triplet[1]) == 2 || ord(triplet[2]) == 2)))
             {
                 xyz.x = xyz.y = xyz.z = 1;
                 break;
@@ -111,7 +111,7 @@ void FillHankelRow(int row, AdderInfo adderInfo)
             j++;
         }
 
-        // cout << xyz.x << " " << xyz.y << " " << xyz.z << " - col - " << col << "\n";
+        // cout << "XYZ: " << xyz.x << " " << xyz.y << " " << xyz.z << " -- " << col << "\n";
         if (xyz.x + xyz.y == xyz.z)
         {
             // Set the corresponding bit to 1 for this matrix row.
@@ -151,11 +151,11 @@ int main(int argc, char* argv[])
 
     // Set floating point precision.
     cout << fixed << showpoint;
-    cout << setprecision(5);
+    cout << setprecision(2);
 
     for (int row = rowStart, i = 0; row < rowEnd; row++, i++)
     {
-        if (i == 1)
+        if (i == 500)
         {
             cout
                 << "\r" << (100.0 * (row - rowStart)) / (rowEnd - rowStart)
