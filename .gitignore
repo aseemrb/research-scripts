@@ -1,7 +1,7 @@
 # Executables and outputs
+*.o
 *.out
 *.txt
 
 # Test files
 test.cpp
-dwp

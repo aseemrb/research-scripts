@@ -2,12 +2,12 @@
 using namespace std;
 
 // Constants.
-const int MaxCols = 100000;
+const int MaxCols = 10000000;
 const int WordLength = 40;
 
 // Global values.
 ll Fibos[WordLength];
-ll SuperFibos[WordLength];
+ll Pells[WordLength];
 string Sequence[MaxCols];
 bitset < MaxCols > HankelRow;
 vector < pair < int, bitset < MaxCols > > > UniqueRows;
@@ -26,25 +26,25 @@ struct AdderInfo
     // cube of digitBase.
     int stateBase;
 
-    // This is either Fibos or SuperFibos.
+    // This is either Fibos or Pells.
     ll* baseValues;
 };
 
 AdderInfo FiboInfo = AdderInfo {2, 8, Fibos};
-AdderInfo SuperFiboInfo = AdderInfo {3, 27, SuperFibos};
+AdderInfo PellInfo = AdderInfo {3, 27, Pells};
 
-// Initialize fibo and superfibo values.
+// Initialize Fibo and Pell values.
 void Initialize()
 {
-    // Fibo and SuperFibo numbers.
+    // Fibo and Pell numbers.
     Fibos[0] = 1;
     Fibos[1] = 2;
-    SuperFibos[0] = 1;
-    SuperFibos[1] = 2;
+    Pells[0] = 1;
+    Pells[1] = 2;
     for(int i = 2; i < WordLength; i++)
     {
         Fibos[i] = Fibos[i - 1] + Fibos[i - 2];
-        SuperFibos[i] = 2 * SuperFibos[i - 1] + SuperFibos[i - 2];
+        Pells[i] = 2 * Pells[i - 1] + Pells[i - 2];
     }
 }
 
@@ -80,10 +80,31 @@ void FillHankelRow(int row, AdderInfo adderInfo)
         ProblemInstance xyz = {0, 0, 0};
 
         int j = 0;
+
+        // prev0[i] tells if triplet[i] was a 0 previously. We reject inputs where we don't have
+        // a 0 after every 2 that is present.
+        bool prev0[3] = {false, false, false};
+
+        // We are scanning in reverse, LSD.
         for (int i = n-1; i >= 0; i--)
         {
-            // cout << "i: " << i << ", " << s[i] << "\n";
             triplet = GetTriplet(ord(s[i]), adderInfo.digitBase);
+
+            // If there's a non-0 after a 2, reject.
+            if (((!prev0[0]) && ord(triplet[0]) == 2) ||
+                ((!prev0[1]) && ord(triplet[1]) == 2) ||
+                ((!prev0[2]) && ord(triplet[2]) == 2) ||
+                (i == 0 && (ord(triplet[0]) == 2 || ord(triplet[1]) == 2 || ord(triplet[2]) == 2)))
+            {
+                xyz.x = xyz.y = xyz.z = 1;
+                break;
+            }
+
+            // Update prev0.
+            prev0[0] = (ord(triplet[0]) == 0);
+            prev0[1] = (ord(triplet[1]) == 0);
+            prev0[2] = (ord(triplet[2]) == 0);
+
             xyz.x += ord(triplet[0]) * adderInfo.baseValues[j];
             xyz.y += ord(triplet[1]) * adderInfo.baseValues[j];
             xyz.z += ord(triplet[2]) * adderInfo.baseValues[j];
@@ -103,7 +124,7 @@ int main(int argc, char* argv[])
 {
     Initialize();
 
-    AdderInfo selectedAdder = SuperFiboInfo;
+    AdderInfo selectedAdder = PellInfo;
     CreateSequence(selectedAdder);
     int rowStart = 0, rowEnd = MaxCols;
 
@@ -130,11 +151,11 @@ int main(int argc, char* argv[])
 
     // Set floating point precision.
     cout << fixed << showpoint;
-    cout << setprecision(2);
+    cout << setprecision(5);
 
     for (int row = rowStart, i = 0; row < rowEnd; row++, i++)
     {
-        if (i == 100)
+        if (i == 1)
         {
             cout
                 << "\r" << (100.0 * (row - rowStart)) / (rowEnd - rowStart)
