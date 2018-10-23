@@ -6,50 +6,37 @@ const int MaxCols = 1e5;
 const int WordLength = 30;
 
 // Global values.
-ll Fibos[WordLength];
 ll Pells[WordLength];
 string Sequence[MaxCols];
 bitset < MaxCols > HankelRow;
 vector < pair < int, bitset < MaxCols > > > UniqueRows;
 map < int, vector < int > > EquivalenceClasses;
 
-struct AdderInfo
-{
-    // Denotes that in the representation of a number in this adder base,
-    // digits from 0 to digitBase - 1 will be used.
-    // This will serve as the base for representing the triplet projection
-    // of x, y, z.
-    int digitBase;
+// Denotes that in the representation of a number in Pell adder base,
+// digits from 0 to DigitBase - 1 will be used.
+// This will serve as the base for representing the triplet projection
+// of x, y, z.
+const int DigitBase = 3;
 
-    // Denotes the base for representation of states.
-    // States are triplets in base digitBase. Hence stateBase is always the
-    // cube of digitBase.
-    int stateBase;
-
-    // This is either Fibos or Pells.
-    ll* baseValues;
-};
-
-AdderInfo FiboInfo = AdderInfo {2, 8, Fibos};
-AdderInfo PellInfo = AdderInfo {3, 27, Pells};
+// Denotes the base for representation of states.
+// States are triplets in base DigitBase. Hence StateBase is always the
+// cube of DigitBase.
+const int StateBase = 27;
 
 // Initialize Fibo and Pell values.
 void Initialize()
 {
     // Fibo and Pell numbers.
-    Fibos[0] = 1;
-    Fibos[1] = 2;
     Pells[0] = 1;
     Pells[1] = 2;
     for(int i = 2; i < WordLength; i++)
     {
-        Fibos[i] = Fibos[i - 1] + Fibos[i - 2];
         Pells[i] = 2 * Pells[i - 1] + Pells[i - 2];
     }
 }
 
 // Create a sequence of state words for the said adder base.
-void CreateSequence(AdderInfo adderInfo)
+void CreateSequence()
 {
     // This string represents the column number in given base.
     string scol = "";
@@ -58,19 +45,20 @@ void CreateSequence(AdderInfo adderInfo)
     for (int i = 0; i < MaxCols; i++)
     {
         Sequence[i] = scol;
-        scol = GetSuccessor(scol, adderInfo.stateBase);
+        scol = GetSuccessor(scol, StateBase);
     }
 }
 
 // Fill HankelRow with the matrix entries for given scenario.
 // HankelRow is a bitset, hence the 0th member is the LSD.
-void FillHankelRow(int row, AdderInfo adderInfo)
+void FillHankelRow(int row)
 {
     string leftWord = Sequence[row];
     string s;
 
     for (int col = 0; col < MaxCols; col++)
     {
+
         // Sequence[col] is the rightWord.
         s = leftWord + Sequence[col];
         int n = s.length();
@@ -88,7 +76,7 @@ void FillHankelRow(int row, AdderInfo adderInfo)
         // We are scanning in reverse, LSD.
         for (int i = n-1; i >= 0; i--)
         {
-            triplet = GetTriplet(ord(s[i]), adderInfo.digitBase);
+            triplet = GetTriplet(ord(s[i]), DigitBase);
 
             // If there's a non-0 after a 2, reject.
             if (((!prev0[0]) && ord(triplet[0]) == 2) ||
@@ -105,13 +93,21 @@ void FillHankelRow(int row, AdderInfo adderInfo)
             prev0[1] = (ord(triplet[1]) == 0);
             prev0[2] = (ord(triplet[2]) == 0);
 
-            xyz.x += ord(triplet[0]) * adderInfo.baseValues[j];
-            xyz.y += ord(triplet[1]) * adderInfo.baseValues[j];
-            xyz.z += ord(triplet[2]) * adderInfo.baseValues[j];
+            xyz.x += ord(triplet[0]) * Pells[j];
+            xyz.y += ord(triplet[1]) * Pells[j];
+            xyz.z += ord(triplet[2]) * Pells[j];
             j++;
         }
 
-        // cout << "XYZ: " << xyz.x << " " << xyz.y << " " << xyz.z << " -- " << col << "\n";
+        if (row == 828 && col == 414)
+        {
+            cout << ord(s[0]) << " ";
+            cout << ord(s[1]) << " ";
+            cout << ord(s[2]) << " ";
+            cout << ord(s[3]) << " ";
+            cout << ord(s[4]) << " ";
+            cout << " XYZ: " << xyz.x << " " << xyz.y << " " << xyz.z << " -- " << col << "\n";
+        }
         if (xyz.x + xyz.y == xyz.z)
         {
             // Set the corresponding bit to 1 for this matrix row.
@@ -124,8 +120,7 @@ int main(int argc, char* argv[])
 {
     Initialize();
 
-    AdderInfo selectedAdder = PellInfo;
-    CreateSequence(selectedAdder);
+    CreateSequence();
     int rowStart = 0, rowEnd = MaxCols;
 
     if (argc == 3)
@@ -164,7 +159,7 @@ int main(int argc, char* argv[])
         }
 
         HankelRow.reset();
-        FillHankelRow(row, selectedAdder);
+        FillHankelRow(row);
 
         bool seen = 0;
         for (auto it = UniqueRows.begin(); it != UniqueRows.end(); it++)

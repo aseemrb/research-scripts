@@ -34,20 +34,6 @@ string GetSuccessor(string s, int base)
     return s;
 }
 
-// Get the string representation of n in given base.
-// Number n is provided in base 10.
-string GetStringInBase(int n, int base)
-{
-    string s = "";
-    s += chr(0);
-    while (n--)
-    {
-        s = GetSuccessor(s, base);
-    }
-
-    return s;
-}
-
 // Get the triplet string for n in base system.
 // Examples:
 // For states of fibonacci adder: base is 2, alphabet size is 8.
