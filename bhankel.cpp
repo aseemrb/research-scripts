@@ -1,57 +1,93 @@
-#include "helpers.h"
+#include <bits/stdc++.h>
+#define ord(x) ((int)(x)-48)
 using namespace std;
+typedef long long ll;
 
 // Constants.
-const int MaxCols = 1e5;
-const int WordLength = 30;
+const int MaxRows = 1000;
+const int MaxCols = 1000;
+const int MAXN = max(MaxRows, MaxCols);
 
 // Global values.
-ll Pells[WordLength];
-string Sequence[MaxCols];
+string vn;
+string Sequence[MAXN];
 bitset < MaxCols > HankelRow;
 vector < pair < int, bitset < MaxCols > > > UniqueRows;
 map < int, vector < int > > EquivalenceClasses;
 
-// Denotes that in the representation of a number in Pell adder base,
-// digits from 0 to DigitBase - 1 will be used.
-// This will serve as the base for representing the triplet projection
-// of x, y, z.
-const int DigitBase = 3;
-
-// Denotes the base for representation of states.
-// States are triplets in base DigitBase. Hence StateBase is always the
-// cube of DigitBase.
-const int StateBase = 27;
-
-void Initialize()
+string NextRadixCandidate(string x)
 {
-    Pells[0] = 1;
-    Pells[1] = 2;
-    for(int i = 2; i < WordLength; i++)
+    if (x == "") return "0";
+    bool done = 0;
+    int l = x.length();
+    int i = l;
+    while (i--)
     {
-        Pells[i] = 2 * Pells[i - 1] + Pells[i - 2];
+        if (x[i] == '0')
+        {
+            x[i] = '1';
+            done = 1;
+            break;
+        }
     }
+
+    if (i >= 0)
+    {
+        for (i += 1; i < l; i++)
+            x[i] = '0';
+    }
+    else
+    {
+        x = "0";
+        for (i = 0; i < l; i++)
+            x = x + "0";
+    }
+
+    return x;
 }
 
 // Create a sequence of state words for the said adder base.
 void CreateSequence()
 {
-    // This string represents the column number in given base.
-    string scol = "";
-    scol += chr(0);
-
-    for (int i = 0; i < MaxCols; i++)
+    ifstream vnf("vn.txt");
+    string line;
+    getline(vnf, vn);
+    vnf.close();
+    Sequence[0] = "";
+    for (int i = 1; i < max(MaxRows, MaxCols); i++)
     {
-        Sequence[i] = scol;
-        scol = GetSuccessor(scol, StateBase);
+        Sequence[i] = NextRadixCandidate(Sequence[i-1]);
+        // cout << Sequence[i] << "\n";
     }
+}
+
+// Print an int vector to file with spaces between elements.
+// Newline after the last element.
+void PrintVector(vector<int> &v, fstream& fs)
+{
+    for (auto it = v.begin(); it != v.end(); it++) fs << (*it) << " ";
+    fs << "\n";
+}
+
+string IntegerToBinStr(int n)
+{
+    if (n == 0) return "0";
+    string s = "";
+    while (n)
+    {
+        if (n&1) s = "1" + s;
+        else s = "0" + s;
+        n >>= 1;
+    }
+
+    return s;
 }
 
 // Fill HankelRow with the matrix entries for given scenario.
 // HankelRow is a bitset, hence the 0th member is the LSD.
 void FillHankelRow(int row)
 {
-    string leftWord = Sequence[row];
+    string leftWord = IntegerToBinStr(row);
     string s;
 
     for (int col = 0; col < MaxCols; col++)
@@ -59,54 +95,11 @@ void FillHankelRow(int row)
 
         // Sequence[col] is the rightWord.
         s = leftWord + Sequence[col];
-        int n = s.length();
-
-        // cout << "s is: " << s << "\n";
-        string triplet;
-        ProblemInstance xyz = {0, 0, 0};
-
-        int j = 0;
-
-        // prev0[i] tells if triplet[i] was a 0 previously. We reject inputs where we don't have
-        // a 0 after every 2 that is present.
-        bool prev0[3] = {false, false, false};
-
-        // We are scanning in reverse, LSD.
-        for (int i = n-1; i >= 0; i--)
-        {
-            triplet = GetTriplet(ord(s[i]), DigitBase);
-
-            // If there's a non-0 after a 2, reject.
-            if (((!prev0[0]) && ord(triplet[0]) == 2) ||
-                ((!prev0[1]) && ord(triplet[1]) == 2) ||
-                ((!prev0[2]) && ord(triplet[2]) == 2) ||
-                (i == n-1 && (ord(triplet[0]) == 2 || ord(triplet[1]) == 2 || ord(triplet[2]) == 2)))
-            {
-                xyz.x = xyz.y = xyz.z = 1;
-                break;
-            }
-
-            // Update prev0.
-            prev0[0] = (ord(triplet[0]) == 0);
-            prev0[1] = (ord(triplet[1]) == 0);
-            prev0[2] = (ord(triplet[2]) == 0);
-
-            xyz.x += ord(triplet[0]) * Pells[j];
-            xyz.y += ord(triplet[1]) * Pells[j];
-            xyz.z += ord(triplet[2]) * Pells[j];
-            j++;
-        }
-
-        if (row == 828 && col == 414)
-        {
-            cout << ord(s[0]) << " ";
-            cout << ord(s[1]) << " ";
-            cout << ord(s[2]) << " ";
-            cout << ord(s[3]) << " ";
-            cout << ord(s[4]) << " ";
-            cout << " XYZ: " << xyz.x << " " << xyz.y << " " << xyz.z << " -- " << col << "\n";
-        }
-        if (xyz.x + xyz.y == xyz.z)
+        int idx = stoi(s, nullptr, 2);
+        // cout << s << "\n";
+        // if (row == 0 || row == 4)
+        //     cout << row << ": " << s << ": " << vn[idx] << "\n";
+        if (vn[idx] == '1')
         {
             // Set the corresponding bit to 1 for this matrix row.
             HankelRow.set(col);
@@ -116,10 +109,9 @@ void FillHankelRow(int row)
 
 int main(int argc, char* argv[])
 {
-    Initialize();
-
     CreateSequence();
-    int rowStart = 0, rowEnd = MaxCols;
+    // cout << vn.length() << "\n";
+    int rowStart = 0, rowEnd = MaxRows;
 
     if (argc == 3)
     {
@@ -160,6 +152,7 @@ int main(int argc, char* argv[])
         FillHankelRow(row);
 
         bool seen = 0;
+        // int bnum = stoi(Sequence[row], nullptr, 2);
         for (auto it = UniqueRows.begin(); it != UniqueRows.end(); it++)
         {
             bitset<MaxCols> xorWithRow = ((it->second) ^ HankelRow);
