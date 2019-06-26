@@ -2,25 +2,21 @@
 #define ord(x) ((int)(x)-48)
 using namespace std;
 
-const int MAXN = 1e6;
+const int MAXN = 1e5;
 
 string B;
-string phi[3] = {"01", "02", "022"};
-string tau[3] = {"0", "01", "011"};
+string phi[2] = {"01", "011"};
+string tau[2] = {"01", "0111"};
 
 int main()
 {
     queue<char> s;
     int c = 1;
     s.push('1');
-    cout << 0;
+    cout << "01";
     for(int i = 0; i < MAXN; i++)
     {
         char next = s.front();
-        if((c++) == MAXN)
-        {
-            c = 0; cout << "\n";
-        }
         cout << tau[ord(next)];
         string img = phi[ord(next)];
         for (int j = 0; j < img.length(); j++)
@@ -30,14 +26,9 @@ int main()
 
     while (!s.empty())
     {
-        // if((c++) == MAXN)
-        // {
-        //     c = 0; cout << "\n";
-        // }
         cout << tau[ord(s.front())];
         s.pop();
     }
-    // cout << s.size() << "\n";
 
     return 0;
 }

@@ -1,4 +1,4 @@
-#include "helpers.h"
+#include "../helpers.h"
 using namespace std;
 
 // Length of generated sequence is 5741 for 9 iterations.
@@ -111,8 +111,6 @@ int main()
                 X5trans[state][jj] = SaveState[i];
             }
         }
-
-        // cout << i << ": " << state << "\n";
     }
 
     for (int i = 0; i < MaxStates; i++)

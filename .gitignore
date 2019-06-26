@@ -1,5 +1,6 @@
-# Executables and outputs
+# Executables, inputs and outputs
 *.o
+*.in
 *.out
 *.txt
 

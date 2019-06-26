@@ -4,8 +4,8 @@ using namespace std;
 typedef long long ll;
 
 // Constants.
-const int MaxRows = 1000;
-const int MaxCols = 1000;
+const int MaxRows = 100;
+const int MaxCols = 100;
 const int MAXN = max(MaxRows, MaxCols);
 
 // Global values.
@@ -49,7 +49,7 @@ string NextRadixCandidate(string x)
 // Create a sequence of state words for the said adder base.
 void CreateSequence()
 {
-    ifstream vnf("vn.txt");
+    ifstream vnf("lucas.txt");
     string line;
     getline(vnf, vn);
     vnf.close();
