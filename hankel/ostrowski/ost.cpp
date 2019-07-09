@@ -17,16 +17,17 @@ using namespace std;
 typedef long long ll;
 
 // Constants.
-const int MaxRows = 5e2;
-const int MaxCols = 1e2;
+const int MAXN = 5e3; // This has to be >= max(MaxRows, MaxCols).
+const int MaxRows = 5e3;
+const int MaxCols = 5e3;
 const int MaxPlace = 50;
 
 // Global values.
 string Sequence;
-string MatrixIndex[MaxRows];
+string MatrixIndex[MAXN];
 vector <char> HankelRow;
-vector < pair <int, vector <char> > > UniqueRows;
-map <int, vector <int> > EquivalenceClasses;
+vector < pair <string, vector <char> > > UniqueRows;
+map <string, set <int> > EquivalenceClasses;
 
 // Example:
 // If CF of alpha = [0, 1, 3, 1, 2, 2, ...] then D_alpha = {0, 1, 3, 1, 2} and RepeatIdx = 4.
@@ -61,13 +62,14 @@ bool VectorEqualHankel(std::vector<T> const &v1, std::vector<T> const &v2)
 void Init();
 void InitMatrix();
 void FillHankelRow(int row);
+bool IsValidOstRep(string rep);
 int IntegerFromOstRep(string rep);
 
 int main()
 {
     Init();
     InitMatrix();
-    int rowStart = 0, rowEnd = MaxRows;
+    int rowStart = 1, rowEnd = MaxRows;
 
     // Open file stream.
     ofstream hankel;
@@ -83,7 +85,7 @@ int main()
         {
             if (VectorEqualHankel((it->second), HankelRow))
             {
-                EquivalenceClasses[it->first].push_back(row);
+                EquivalenceClasses[it->first].insert(IntegerFromOstRep(MatrixIndex[row]));
                 seen = 1;
                 break;
             }
@@ -94,8 +96,8 @@ int main()
             hankel << row << ": ";
             PrintVector(HankelRow, hankel);
             hankel << "\n";
-            UniqueRows.push_back(make_pair(row, HankelRow));
-            EquivalenceClasses[row] = {row};
+            UniqueRows.push_back(make_pair(MatrixIndex[row], HankelRow));
+            EquivalenceClasses[MatrixIndex[row]] = {IntegerFromOstRep(MatrixIndex[row])};
         }
     }
 
@@ -183,10 +185,11 @@ void InitMatrix()
     getline(seq, Sequence);
     seq.close();
 
-    int i = 0;
+    MatrixIndex[0] = "";
+    int i = 1;
     while (getline(rep, MatrixIndex[i++]))
     {
-        if (i == MaxRows) break;
+        if (i == MAXN) break;
     }
 
     rep.close();
@@ -194,13 +197,18 @@ void InitMatrix()
 
 bool IsValidOstRep(string rep)
 {
+    if (rep == "") return false;
     int n = rep.length();
     if(ord(rep[n-1]) >= D_alpha[1]) return false;
     int k = 2;
-    for (int i = 2; i < n; i++,k++)
+    for (int i = 2; i <= n; i++,k++)
     {
         if(k == D_alpha.size()) k = RepeatIdx;
         if(ord(rep[n-i]) > D_alpha[k])
+        {
+            return false;
+        }
+        else if (ord(rep[n-i]) == D_alpha[k] && ord(rep[n-i+1]) > 0)
         {
             return false;
         }
@@ -243,8 +251,9 @@ void FillHankelRow(int row)
         }
         else
         {
+            // cout << "Invalid: " << s << "\n";
             // Relaxation character. Equates to everything.
-            HankelRow.push_back('*');
+            HankelRow.push_back('-');
         }
     }
 }
